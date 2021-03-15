@@ -29,6 +29,17 @@ MACS3/Signal/Prob.c
 MACS3/Signal/ScoreTrack.c
 MACS3/Signal/Signal.c
 MACS3/Signal/SignalProcessing.c
+MACS3/Signal/PeakVariants.c
+MACS3/Signal/PosReadsInfo.c
+MACS3/Signal/PscoreCal.c
+MACS3/Signal/RACollection.c
+MACS3/Signal/ReadAlignment.c
+MACS3/Signal/UnitigRACollection.c
+MACS3/Signal/VariantStat.c
+
+# fermi-lite .o
+MACS3/fermi-lite/*.o
+MACS3/fermi-lite/*.a
 
 # MacOSX temp
 .DS_Store

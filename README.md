@@ -34,9 +34,9 @@ make sure that the main branch passes unit testing on certain
 functions and subcommands to reproduce the correct outputs. We will
 add more new features in the future.**
 
-## Recent Changes for MACS (3.0.0a6)
+## Recent Changes for MACS (3.0.0a7)
 
-### 3.0.0a6
+### 3.0.0a7
 	* New features
 	
 	1) Speed/memory optimization.  Use the cykhash to replace python
@@ -62,7 +62,11 @@ add more new features in the future.**
 	function was originally developed under code name SAPPER. Now
 	SAPPER has been merged into MACS. Also, `simde` has been added as
 	a submodule in order to support fermi-lite library under non-x64
-	architectures.
+	architectures. The BAM reader for `callvar` is made to be used
+	together with BAI (BAM index) file. Different with SAPPER, now the
+	`callvar` command doesn't require users to prepare a subset BAM
+	file which only contains reads in peak regions. We may implement
+	more functions to use this random access approach.
 
 ## Install
 
