@@ -1,7 +1,7 @@
 # cython: language_level=3
 # cython: profile=True
 # cython: linetrace=True
-# Time-stamp: <2020-12-06 23:54:17 Tao Liu>
+# Time-stamp: <2021-03-30 12:32:48 Tao Liu>
 
 """Module for Calculate Scores.
 
@@ -1051,7 +1051,7 @@ cdef class CallerFromAlignments:
 
         """
         cdef:
-            int32_t summit_pos, tstart, tend, tmpindex, summit_index, i, midindex
+            uint32_t summit_pos, tstart, tend, tmpindex, summit_index, i, midindex
             float64_t treat_v, ctrl_v, tsummitvalue, ttreat_p, tctrl_p, tscore, summit_treat, summit_ctrl, summit_p_score, summit_q_score
             int32_t tlist_scores_p
 

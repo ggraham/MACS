@@ -1,5 +1,5 @@
-2021-02-07  Tao Liu  <vladimir.liu@gmail.com>
-	MACS 3.0.0a6
+2021-03-30  Tao Liu  <vladimir.liu@gmail.com>
+	MACS 3.0.0a7
 
 	* New features:
 
@@ -21,10 +21,11 @@
 	and - strand, then use all of them to calculate the
 	cross-correlation. (a related bug has been fix #442)
 
-	7) Call variants in peak regions directly from BAM files. The 
-	function was originally developed under code name SAPPER. Now 
-	SAPPER has been merged into MACS. Also, `simde` has been added as 
-	a submodule in order to support fermi-lite library under non-x64 
+	7) Call variants in peak regions directly from BAM files. The
+	function was originally developed under code name SAPPER. Now
+	SAPPER has been merged into MACS. The command line is different
+	with SAPPER but easier to use. Also, `simde` has been added as a
+	submodule in order to support fermi-lite library under non-x64
 	architectures.
 
 2020-04-11  Tao Liu  <vladimir.liu@gmail.com>
