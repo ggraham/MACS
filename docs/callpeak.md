@@ -1,37 +1,58 @@
 # Call peaks
 
-This is the main function in MACS3. It can be invoked by `macs3
-callpeak` . If you type this command with `-h`, you will see a full
-description of command-line options. Here we only list the essentials.
+In this page, we will discuss usage of the main function in MACS3 --
+`callpeak` . It can be invoked by `macs3 callpeak` . The goal of this
+function is to find enrichment of a target-enriched DNA assay such as
+ChIP-seq, ATAC-seq, Cut&Tag and etc. The `callpeak` function contains
+steps from preprocess, callling peaks, to some downstream
+anslysis. MACS3 also provides a series of subcommands that you can use
+to build a pipeline to implement the function of `callpeak`. You can
+find the information
+[here](https://github.com/macs3-project/MACS/wiki/Advanced%3A-Call-peaks-using-MACS2-subcommands).
+
+To see a full description of command-line options for `callpeak`, type
+`macs3 callpeak -h`. Here we list the essential options.
 
 ## Essential Options
 
-### `-t`/`--treatment FILENAME`
+### `-t TFILE [TFILE ...]`/`--treatment TFILE [TFILE ...]`
 
 This is the only REQUIRED parameter for MACS. The file can be in any
-supported format -- see detail in the `--format` option. If you have
-more than one alignment file, you can specify them as `-t A B C`. MACS
-will pool up all these files together.
+supported format, although we highly recommend BAM format -- see
+detail in the `--format` option. If you have more than one alignment
+file, you can specify them as `-t A B C`. MACS will pool up all these
+files together. Regarding how to properly process data with
+replicates, please see [here](./Replicates.md).
 
-### `-c`/`--control`
+### `-c [CFILE ...]`/`--control [CFILE ...]`
 
 The control, genomic input or mock IP data file. Please follow the
-same direction as for `-t`/`--treatment`.
+same direction as for `-t`/`--treatment`. Some experiment doesn't have
+matching controls, for example, the ATAC-seq. In these cases, please
+ignore this option. Some users also use this option to *compare* two
+treatment files from two conditions. However, please keep in mind that
+MACS processes treatment and control file differently so in order to
+do a fair comparison, you'd better consider [`bdgcmp`](./bdgcmp.md)
+and [`bdgdiff`](./bdgdiff.md) command.
 
-### `-n`/`--name`
+### `-n NAME`/`--name NAME`
 
-The name string of the experiment. MACS will use this string NAME to
-create output files like `NAME_peaks.xls`, `NAME_negative_peaks.xls`,
+The name of the experiment. MACS will use this NAME to create output
+files including `NAME_peaks.xls`, `NAME_negative_peaks.xls`,
 `NAME_peaks.bed` , `NAME_summits.bed`, `NAME_model.r` and so on. So
 please avoid any confliction between these filenames and your existing
-files.
+files. Some users use a side effect of this option to save files in a
+subdirectory. For example, `-n A/B` will make MACS to save output
+files in a subdirectory named `A`. However, we suggest the users to
+use `--outdir` option for this purpose, since the `NAME` will also to
+be used in the peak names in the output files.
 
-### `--outdir`
+### `--outdir OUTDIR`
 
-MACS3 will save all output files into the specified folder for this
+MACS3 will save all output files into a specified folder for this
 option. A new folder will be created if necessary.
 
-### `-f`/`--format FORMAT`
+### `-f FORMAT`/`--format FORMAT`
 
 Format of tag file can be `ELAND`, `BED`, `ELANDMULTI`, `ELANDEXPORT`,
 `SAM`, `BAM`, `BOWTIE`, `BAMPE`, or `BEDPE`. Default is `AUTO` which
@@ -42,15 +63,18 @@ implicitly specify the format for `BAMPE` and `BEDPE`.
 
 Nowadays, the most common formats are `BED` or `BAM` (including
 `BEDPE` and `BAMPE`). Our recommendation is to convert your data to
-`BED` or `BAM` first.
+`BED` or `BAM` first. As a recommendation, if you have a plain text
+`SAM` file, please convert it into the binary counterpart -- `BAM`
+file, since through the converting process we can make sure the binary
+format file is valid. 
 
 Also, MACS3 can detect and read gzipped file. For example, `.bed.gz`
-file can be directly used without being uncompressed with `--format
-BED`.
+file can be directly used with `--format BED` option, without being
+uncompressed first.
 
 Here are detailed explanation of the recommanded formats:
 
-## `BED`
+#### `BED`
 
 The BED format can be found at [UCSC genome browser
 website](http://genome.ucsc.edu/FAQ/FAQformat#format1).
@@ -64,15 +88,35 @@ required by MACS. And please pay attention that the coordinates in BED
 format are zero-based and half-open. See more detail at
 [UCSC site](http://genome.ucsc.edu/FAQ/FAQtracks#tracks1).
 
-## `BAM`/`SAM`
+The `BEDPE` format is in fact a `BED` format with only three columns,
+which define the location of the entire fragment. Please refer to the
+corresponding section below.
 
-If the format is `BAM`/`SAM`, please check the definition in
-(http://samtools.sourceforge.net/samtools.shtml).  If the `BAM` file is
-generated for paired-end data, MACS will only keep the left mate(5'
-end) tag. However, when format `BAMPE` is specified, MACS will use the
-real fragments inferred from alignment results for reads pileup.
+#### `BAM`/`SAM`
 
-## `BEDPE` or `BAMPE`
+If the format is `BAM`/`SAM`, please check the definition at
+[samtools project site](https://samtools.github.io/hts-specs/).  **If
+the `BAM` file is generated for paired-end data, MACS will only keep
+the left mate(5' end) tag of properly paired reads.** However, when
+format `BAMPE` is specified, MACS will use the real fragments inferred
+from alignment results for reads pileup.
+
+MACS uses the `bwflag` in BAM/SAM to filter the alignment
+results. Check
+[Picard site](https://broadinstitute.github.io/picard/explain-flags.html)
+for a nice explanation on the `bwflag`, also the
+[wikipedia page](https://en.wikipedia.org/wiki/SAM_(file_format)) . If
+the `bwflag` matches `2820`, i.e., 'read unmapped' or 'not primary
+alignment' or 'read fails QC' or 'supplementary', the alignment record
+will be discarded. If `bwflag` indicates (`1`) that the read is from a
+read pair, then: if the read is not in a proper pair (not `2`), it
+will be discarded; if the mate (other read in the pair) is not mapped,
+it will be discarded; if the this read is the second read ( or 3'
+read) in the pair, it will also be discarded. Please note that the
+read is the second read or a 3' read doesn't mean that the read is the
+'rightmost' read according to mapping coordination.
+
+#### `BEDPE` or `BAMPE`
 
 A special mode will be triggered while the format is specified as
 `BAMPE` or `BEDPE`. In this way, MACS3 will process the `BAM` or `BED`
@@ -80,25 +124,25 @@ files as paired-end data. Instead of building a bimodal distribution
 of plus and minus strand reads to predict fragment size, MACS3 will
 use actual insert sizes of pairs of reads to build fragment pileup.
 
-The `BAMPE` format is just a `BAM` format containing paired-end alignment
-information, such as those from `BWA` or `BOWTIE`.
+The `BAMPE` format is just a `BAM` format containing paired-end
+alignment information, such as those from `BWA` or `BOWTIE`.
 
 The `BEDPE` format is a simplified and more flexible `BED` format,
 which only contains the first three columns defining the chromosome
 name, left and right position of the fragment from Paired-end
 sequencing. Please note, this is NOT the same format used by
 `BEDTOOLS`, and the `BEDTOOLS` version of `BEDPE` is actually not in a
-standard `BED` format. You can use MACS3 subcommand `randsample` to
-convert a `BAM` file containing paired-end information to a `BEDPE`
-format file:
+standard `BED` format. **You can use MACS3 subcommand
+[`randsample`](./randsample.md) to convert a `BAM` file containing
+paired-end information to a `BEDPE` format file**:
 
 ```
 macs3 randsample -i the_BAMPE_file.bam -f BAMPE -p 100 -o the_BEDPE_file.bed
 ```
 
-### `-g`/`--gsize`
+The trick is to keep 100% of reads with [`randsample`](./randsample.md) .
 
-PLEASE assign this parameter to fit your needs!
+### `-g GSIZE`/`--gsize GSIZE`
 
 It's the mappable genome size or effective genome size which is
 defined as the genome size which can be sequenced. Because of the
@@ -112,34 +156,47 @@ genome. Here are all precompiled parameters for effective genome size:
  * ce: 9e7
  * dm: 1.2e8
 
+You can use the word `hs`, `mm`, `ce`, or `dm` to access the
+precompiled numbers, or give an actual number of the mappable genome
+size. 
+
 Users may want to use k-mer tools to simulate mapping of Xbps long
 reads to target genome, and to find the ideal effective genome
 size. However, usually by taking away the simple repeats and Ns from
-the total genome, one can get an approximate number of effective
-genome size. A slight difference in the number won't cause a big
-difference of peak calls, because this number is used to estimate a
-genome-wide noise level which is usually the least significant one
+the total genome, one can get an approximate number of effective or
+mappable genome size. A slight difference in the number won't cause a
+big difference of peak calls, because this number is used to estimate
+a genome-wide noise level which is usually the least significant one
 compared with the *local biases* modeled by MACS.
 
-### `-s`/`--tsize`
+### `-s TSIZE`/`--tsize TSIZE`
 
-The size of sequencing tags. If you don't specify it, MACS will try to
-use the first 10 sequences from your input treatment file to determine
-the tag size. Specifying it will override the automatically determined
-tag size.
+The size of sequencing tags/reads. If you don't specify it, MACS will
+try to use the first 10 sequences from your input treatment file to
+determine the tag size or the read length. Specifying it will override
+the value automatically detected. Check the section on `--min-gap` on
+a side effect of read length value.
 
-### `-q`/`--qvalue`
+### `-q QVALUE`/`--qvalue QVALUE`
 
 The q-value (minimum FDR) cutoff to call significant regions. Default
-is 0.05. For broad marks, you can try 0.05 as the cutoff. Q-values are
-calculated from p-values using the Benjamini-Hochberg procedure.
+is 0.05. Q-values are calculated from p-values using the
+[Benjamini-Hochberg
+procedure](https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Hochberg_procedure).
 
-### `-p`/`--pvalue`
+### `-p PVALUE`/`--pvalue PVALUE`
 
-The p-value cutoff. If `-p` is specified, MACS3 will use p-value instead
-of q-value.
+The p-value cutoff. The p-value is calculated using Poisson CDF
+function where the lambda is the local bias MACS3 estimated from
+control or from a genome background, and the observed value is the
+pileup signal from treatment. If `-p` is specified, MACS3 will use
+p-value instead of q-value. In another word, `-p` will override `-q`
+cutoff. In almost all cases (if there is no bug in the codes), given
+the same value, `-p` provides a more relexed cutoff comparing to
+`-q`. Regarding how to find "proper" cutoff, please check the
+discussion on [cutoff analysis](./cutoff-analysis.md).
 
-### `--min-length`, `--max-gap`
+### `--min-length MINLEN` and `--max-gap MAXGAP`
 
 These two options can be used to fine-tune the peak calling behavior
 by specifying the minimum length of a called peak and the maximum
@@ -154,17 +211,18 @@ effect on the result. For broad peak calling with `--broad` option
 set, the DEFAULT `max-gap` for merging nearby stronger peaks will be
 the same as narrow peak calling, and 4 times of the `max-gap` will be
 used to merge nearby weaker (broad) peaks. You can also use
-`--cutoff-analysis` option with the default setting, and check the
-column `avelpeak` under different cutoff values to decide a reasonable
-`min-length` value.
+[`--cutoff-analysis`](./cutoff-analysis.md) option with the default
+setting, and check the column `avelpeak` under different cutoff values
+to decide a reasonable `min-length` value.
 
 ### `--nolambda`
 
-With this flag on, MACS will use the background lambda as local
-lambda. This means MACS will not consider the local bias at peak
-candidate regions.
+With this flag on, MACS will use the whole genome background as local
+lambda. This means MACS will not consider the local (1kbps, 10kbps)
+bias at peak candidate regions. This option is recommended while
+processing assay with no matching control, for example, ATAC-seq.
 
-### `--slocal`, `--llocal`
+### `--slocal SMALLLOCAL` and `--llocal LARGELOCAL`
 
 These two parameters control which two levels of regions will be
 checked around the peak regions to calculate the maximum lambda as
@@ -173,22 +231,28 @@ region(`--slocal`), and 10000bps for large local region(`--llocal`)
 which captures the bias from a long-range effect like an open
 chromatin domain. You can tweak these according to your
 project. Remember that if the region is set too small, a sharp spike
-in the input data may kill a significant peak.
+in the input data may kill a significant peak. In most cases, you
+don't have to tweak these two parameters.
 
 ### `--nomodel`
 
-While on, MACS will bypass building the shifting model.
+While on, MACS will bypass building the read shifting model in order
+to determine the 'fragment size' or 'd'. In PE mode, this option is
+ignored since the actual insertion size of each read pair will be used
+as the fragment size.
 
-### `--extsize`
+### `--extsize EXTSIZE`
 
 While `--nomodel` is set, MACS uses this parameter to extend reads in
 5'->3' direction to fix-sized fragments. For example, if the size of
 the binding region for your transcription factor is 200 bp, and you
 want to bypass the model building by MACS, this parameter can be set
 as 200. This option is only valid when `--nomodel` is set or when MACS
-fails to build model and `--fix-bimodal` is on.
+fails to build model and `--fix-bimodal` is on. In most cases, if you
+plan to control the behavior of read extension, please use `--nomodel
+--extsize XXX`.
 
-### `--shift`
+### `--shift SHIFT`
 
 Note, this is NOT the legacy `--shiftsize` option which is replaced by
 `--extsize`! You can set an arbitrary shift in bp here. Please Use
@@ -199,13 +263,14 @@ fragments. When this value is negative, ends will be moved toward
 3'->5' direction, otherwise 5'->3' direction. Recommended to keep it
 as default 0 for ChIP-Seq datasets, or -1 * half of *EXTSIZE* together
 with `--extsize` option for detecting enriched cutting loci such as
-certain DNAseI-Seq datasets. Note, you can't set values other than 0
-if the format is BAMPE or BEDPE for paired-end data. The default is 0.
+certain DNAseI-Seq or ATAC-seq datasets. Note, you can't set values
+other than 0 if the format is BAMPE or BEDPE for paired-end data. The
+default is 0.
 
 Here are some examples for combining `--shift` and `--extsize`:
 
-1. To find enriched cutting sites such as some DNAse-Seq datasets. In
-this case, all 5' ends of sequenced reads should be extended in both
+1. To find enriched cutting sites such as some DNAse-Seq or ATAC-seq
+datasets, all 5' ends of sequenced reads should be extended in both
 directions to smooth the pileup signals. If the wanted smoothing
 window is 200bps, then use `--nomodel --shift -100 --extsize 200`.
 
@@ -214,26 +279,37 @@ nucleosomes using a half-nucleosome size for wavelet analysis
 (e.g. NPS algorithm). Since the DNA wrapped on nucleosome is about
 147bps, this option can be used: `--nomodel --shift 37 --extsize 73`.
 
-### `--keep-dup`
+### `--keep-dup KEEPDUPLICATES`
 
-It controls the MACS behavior towards duplicate tags at the exact same
-location -- the same coordination and the same strand. The default
-`auto` option makes MACS calculate the maximum tags at the exact same
-location based on binomial distribution using 1e-5 as p-value cutoff;
-and the `all` option keeps every tag.  If an integer is given, at most
-this number of tags will be kept at the same location. The default is
-to keep one tag at the same location. Default: 1
+It controls the MACS behavior towards duplicate tags ( or pairs in PE
+mode) at the exact same location -- the same coordination and the same
+strand. The default `auto` option makes MACS to calculate the maximum
+tags at the exact same location based on binomial distribution using
+1e-5 as p-value cutoff; and the `all` option keeps every tag.  If an
+integer is given, at most this number of tags will be kept at the same
+location. The default is to keep one tag at the same
+location. However, in many cases, users want to use their own
+preprocessing tool to remove duplicates. If so, please make sure that
+the duplicates have been actually *removed* from the BAM or BED file
+instead of only simply marking them (e.g. `Picard` `MarkDuplicates`),
+then use `--keep-dup all` for `callpeak`. Default: 1
 
 ### `--broad`
 
-When this flag is on, MACS will try to composite broad regions in
-BED12 ( a gene-model-like format ) by putting nearby highly enriched
-regions into a broad region with loose cutoff. The broad region is
-controlled by another cutoff through `--broad-cutoff`. Please note
-that, the `max-gap` value for merging nearby weaker/broad peaks is 4
-times of `max-gap` for merging nearby stronger peaks. The later one
-can be controlled by `--max-gap` option, and by default it is the
-average fragment/insertion length in the PE data. DEFAULT: False
+When this flag is on, MACS will enter the 'broad peak calling mode'
+and try to composite broad regions in BED12 ( a gene-model-like format
+) by putting nearby highly enriched regions into a broad region with
+loose cutoff. The highly enriched regions will be controled by `-p` or
+`-q` option, and the broad region is controlled by another cutoff
+through `--broad-cutoff`. Please note that, the `max-gap` value for
+merging nearby weaker/broad peaks is 4 times of `max-gap` for merging
+nearby stronger peaks. The later one can be controlled by `--max-gap`
+option, and by default it is the average fragment/insertion length in
+the PE data. If your purpose is only to detect a broad region and you
+have no interest in knowing how the highly enriched regions are
+organized in the broad region, you can simply use a loose cutoff `-p`
+or `-q` (of e.g. 0.1), bigger `--max-gap` and `--min-length` settings,
+*without* using `--broad`. DEFAULT: False
 
 ### `--broad-cutoff`
 
@@ -243,10 +319,18 @@ it's a q-value cutoff.  DEFAULT: 0.1
 
 ### `--scale-to <large|small>`
 
-When set to `large`, linearly scale the smaller dataset to the same
-depth as the larger dataset. By default or being set as `small`, the
-larger dataset will be scaled towards the smaller dataset. Beware, to
-scale up small data would cause more false positives.
+MACS will decide which, treatment of control, has to be scaled in
+order to balance the total number of reads. When set to `large`,
+linearly scale the smaller dataset to the same depth as the larger
+dataset. By default or being set as `small`, the larger dataset will
+be scaled towards the smaller dataset. We recommend the default
+behavior since to scale up small data would cause more false
+positives. Please beware that the scaling will affect the resulting
+'bedGraph' output of fragment pileup. For example, if the consequence
+is that the treatment has to be scaled (either up or down-scaled), the
+pileup value in the `NAME_treat_pileup.bdg` will not be integer
+number. And the same is for the control pileup
+`NAME_control_lambda.bdg` if the control has to be scaled.
 
 ### `-B`/`--bdg`
 
@@ -255,14 +339,29 @@ lambda in bedGraph files. The bedGraph files will be stored in the
 current directory named `NAME_treat_pileup.bdg` for treatment data,
 `NAME_control_lambda.bdg` for local lambda values from control.
 
+### `--SPMR`
+
+If this flag is on, MACS will store the 'Signal Per Million Reads' in
+the bedGraph files mentioned for the `-B`/`--bdg` option. The values
+in the 4th column of bedGraph file equal to the actual fragment pileup
+divided by the number of million reads in the library. As for PE data,
+the pileup will be divided by the number of million pairs. If you plan
+to generate signals file that can be loaded into genome browser and
+you plan to visually compare the pileup from different samples, this
+`--SPMR` option is recommended.
+
 ### `--call-summits`
 
-MACS will now reanalyze the shape of signal profile (p or q-score
-depending on the cutoff setting) to deconvolve subpeaks within each
-peak called from the general procedure. It's highly recommended to
-detect adjacent binding events. While used, the output subpeaks of a
-big peak region will have the same peak boundaries, and different
-scores and peak summit positions.
+When this option is on, MACS will reanalyze the shape of signal
+profile (p or q-score depending on the cutoff setting) to deconvolve
+subpeaks within each peak called from the general procedure. It's
+highly recommended to detect adjacent binding events. While used, the
+output subpeaks of a big peak region will have the same peak
+boundaries, and different scores and peak summit positions. Please
+note that, if a peak has multiple summits, it will be written in
+multiple lines in the output peak file with the same content in the
+first three columns, which are used to describe the location of the
+whole peak region. 
 
 ### `--buffer-size`
 
