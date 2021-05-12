@@ -1,65 +1,31 @@
 # INSTALL Guide For MACS3
-Time-stamp: <2020-12-05 16:35:26 Tao Liu>
+Time-stamp: <2021-05-12 17:05:31 Tao Liu>
 
-Please check the following instructions to complete your installation.
-
-## Prerequisites
-
-### Python3
-
-MACS v3.x.x requires Python3. We have tested MACS in Python3.6, 3.7 and 3.8. 
-
-### NumPy
-
-MACS also requires [Numpy](http://www.scipy.org/Download) (>=1.17).
-
-### Cython
-
-[Cython](http://cython.org/) is required to translate .pyx codes to .c
-code. The version of Cython has to be >=0.29.
-
-### cykhash
-
-[cykhash](https://github.com/realead/cykhash) is a fast and efficient
-hash implementation in Cython. It is used to replace python dictionary
-in MACS3 codes. Since it requires Cython, make sure you install Cython
-first, then install cykhash. 
-
-### fermi-lite and simde
-
-A newly added `callvar` subcommand in MACS3 uses
-[fermi-lite](https://github.com/lh3/fermi-lite) to assemble the DNA
-sequence in a peak region while necessary. A modified fermi-lite has
-been included in MACS3 package. Since fermi-lite was implemented using
-intel SSE2 intrinsics for x86 CPUs, we added
-[simde](https://github.com/simd-everywhere/simde) as submodule to
-solve the compatibility issues on non-x86 architectures. Note that, we
-may remove this submodule and add simde in *dependencies* of MACS3
-later.
-
-### GCC and Python-dev 
-
-GCC is required to compile `.c` codes in MACS v3 package, and python 
-header files are needed. If you are using Mac OSX, I recommend you 
-install Xcode; if you are using Linux, you need to make sure 
-`python-dev` package is installed -- the actual package name depends 
-on the Linux OS distribution, you are using. 
-
+Please check the following instructions to complete your
+installation.
 
 ## Prepare a virtual Python environment 
 
 We strongly recommend installing your MACS program in a virtual
 environment, so that you have full control of your installation and
-won't mess up with your system libraries. To learn about virtual
-environment, read [this
-article](https://docs.python.org/3/library/venv.html). A simple way to
-create a virtual environment of Python3 is
+won't mess up with your system libraries. Futhermore, you don't need
+to bother your system admin :) To learn about virtual environment,
+read [this article](https://docs.python.org/3/library/venv.html). A
+simple way to create a virtual environment of Python3 is
 
 `$ python3 -m venv MyPythonEnv/`
 
 Then active it by
 
 `$ source MyPythonEnv/bin/active`
+
+Another popular solution to prepare an independent Python environment
+is to use [`conda`](https://docs.conda.io/en/latest/). Follow the
+instruction here to install
+[`miniconda`](https://docs.conda.io/en/latest/miniconda.html), then
+create an environment with `conda create`. After you enter the created
+conda environment, you can either install MACS using `pip`, `conda`,
+or from source codes.
 
 ## Install through PyPI
 
@@ -76,7 +42,8 @@ currently installed MACS3, compare the version with the one on PyPI
 repository, download and install a newer version while necessary.
 
 If you plan to install MACS in your own user directory, use `pip
-install macs3 --user`.
+install macs3 --user`. Use this only if you are not using virtual
+environment.
 
 ## Install from source
 
@@ -111,6 +78,42 @@ order to install MACS. When Cython is available, this setup script
 will regenerate C codes from Pyx codes when necessary. When Cython is
 not available, this setup script will just use the C codes included in
 the release package (or your Github clone) for installation.
+
+### Prerequisites
+
+1. Python3  
+MACS v3 requires Python3. We have tested MACS in Python3.7, 3.8 and 3.9. 
+
+2. NumPy  
+MACS also requires [Numpy](http://www.scipy.org/Download) (>=1.17).
+
+3. Cython  
+[Cython](http://cython.org/) is required to translate `.pyx` codes to `.c`
+codes. The version of Cython has to be >=0.29.
+
+4. cykhash  
+[cykhash](https://github.com/realead/cykhash) is a fast and efficient
+hash implementation in Cython. It is used to replace python dictionary
+in MACS3 codes. Since it requires Cython, make sure you install Cython
+first, then install cykhash. 
+
+5. fermi-lite and simde  
+A newly added `callvar` subcommand in MACS3 uses
+[fermi-lite](https://github.com/lh3/fermi-lite) to assemble the DNA
+sequence in a peak region while necessary. A modified fermi-lite has
+been included in MACS3 package. Since fermi-lite was implemented using
+intel SSE2 intrinsics for x86 CPUs, we added
+[simde](https://github.com/simd-everywhere/simde) as submodule to
+solve the compatibility issues on non-x86 architectures. Note that, we
+may remove this submodule and add simde in *dependencies* of MACS3
+later.
+
+6. GCC and Python-dev  
+GCC is required to compile `.c` codes in MACS v3 package, and python 
+header files are needed. If you are using Mac OSX, I recommend you 
+install Xcode; if you are using Linux, you need to make sure 
+`python-dev` package is installed -- the actual package name depends 
+on the Linux OS distribution, you are using. 
 
 ## Configure environment variables
 
