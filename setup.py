@@ -30,9 +30,9 @@ classifiers =[\
               'Operating System :: POSIX',
               'Operating System :: Unix',
               'Topic :: Scientific/Engineering :: Bio-Informatics',
-              'Programming Language :: Python :: 3.6',
               'Programming Language :: Python :: 3.7',
               'Programming Language :: Python :: 3.8',
+              'Programming Language :: Python :: 3.9',
               'Programming Language :: Cython', ]
 
 install_requires = [ "numpy>=1.17",

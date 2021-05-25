@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2021-03-10 16:43:18 Tao Liu>
+# Time-stamp: <2021-05-25 14:27:57 taoliu>
 """Description: MACS v3 main executable.
 
 This code is free software; you can redistribute it and/or modify it
@@ -506,24 +506,22 @@ def add_randsample_parser( subparsers ):
     argparser_randsample = subparsers.add_parser( "randsample",
                                                   help = "Randomly sample number/percentage of total reads." )
     argparser_randsample.add_argument( "-i", "--ifile", dest = "ifile", type = str, required = True, nargs = "+",
-                                      help = "Alignment file. If multiple files are given as '-t A B C', then they will all be read and combined. Note that pair-end data is not supposed to work with this command. REQUIRED." )
+                                      help = "Alignment file. If multiple files are given as '-t A B C', then they will all be read and combined. REQUIRED." )
 
-    p_or_n_group = argparser_randsample.add_mutually_exclusive_group( required = True )
-    p_or_n_group.add_argument( "-p", "--percentage", dest = "percentage", type = float,
-                               help = "Percentage of tags you want to keep. Input 80.0 for 80%%. This option can't be used at the same time with -n/--num. REQUIRED")
+    p_or_n_group = argparser_randsample.add_mutually_exclusive_group( required = False )
+    p_or_n_group.add_argument( "-p", "--percentage", dest = "percentage", type = float, default = 100.0,
+                               help = "Percentage of tags you want to keep. Input 80.0 for 80%%. This option can't be used at the same time with -n/--num. The default is to keep all, so it can be used to convert any formatof alignment file into BED format. Default: 100")
     p_or_n_group.add_argument( "-n", "--number", dest = "number", type = float,
-                               help = "Number of tags you want to keep. Input 8000000 or 8e+6 for 8 million. This option can't be used at the same time with -p/--percent. Note that the number of tags in output is approximate as the number specified here. REQUIRED" )
+                               help = "Number of tags you want to keep. Input 8000000 or 8e+6 for 8 million. This option can't be used at the same time with -p/--percent. When using -n, the default -p setting will be overitten. Note that the number of tags in final output may not be exactly as the number specified here. Since the number will be converted into percentage first, we will lose some precison." )
     argparser_randsample.add_argument( "--seed", dest = "seed", type = int, default = -1,
                                        help = "Set the random seed while down sampling data. Must be a non-negative integer in order to be effective. DEFAULT: not set" )
     argparser_randsample.add_argument( "-o", "--ofile", dest = "outputfile", type = str,
                                       help = "Output BED file name. If not specified, will write to standard output. Note, if the input format is BAMPE or BEDPE, the output will be in BEDPE format. DEFAULT: stdout",
                                       default = None)
     add_outdir_option( argparser_randsample )
-    argparser_randsample.add_argument( "-s", "--tsize", dest = "tsize", type = int, default = None,
-                                       help = "Tag size. This will override the auto detected tag size. DEFAULT: Not set")
     argparser_randsample.add_argument( "-f", "--format", dest = "format", type = str,
                                        choices=("AUTO","BAM","SAM","BED","ELAND","ELANDMULTI","ELANDEXPORT","BOWTIE","BAMPE","BEDPE"),
-                                       help = "Format of tag file, \"AUTO\", \"BED\" or \"ELAND\" or \"ELANDMULTI\" or \"ELANDEXPORT\" or \"SAM\" or \"BAM\" or \"BOWTIE\" or \"BAMPE\" or \"BEDPE\". The default AUTO option will %(prog)s decide which format the file is. Please check the definition in README file if you choose ELAND/ELANDMULTI/ELANDEXPORT/SAM/BAM/BOWTIE or BAMPE/BEDPE. DEFAULT: \"AUTO\"",
+                                       help = "Format of tag file. It can be either \"AUTO\", \"BED\", \"ELAND\", \"ELANDMULTI\", \"ELANDEXPORT\", \"SAM\", \"BAM\", \"BOWTIE\", \"BAMPE\", or \"BEDPE\". The default \"AUTO\" setting will let `%(prog)s` decide which format the file is. Please check the definition in `callpeak` function if you choose ELAND/ELANDMULTI/ELANDEXPORT/SAM/BAM/BOWTIE or BAMPE/BEDPE. DEFAULT: \"AUTO\"",
                                        default = "AUTO" )
     argparser_randsample.add_argument( "--buffer-size", dest = "buffer_size", type = int, default = "100000",
                                        help = "Buffer size for incrementally increasing internal array size to store reads alignment information. In most cases, you don't have to change this parameter. However, if there are large number of chromosomes/contigs/scaffolds in your alignment, it's recommended to specify a smaller buffer size in order to decrease memory usage (but it will take longer time to read alignment files). Minimum memory requested for reading an alignment file is about # of CHROMOSOME * BUFFER_SIZE * 8 Bytes. DEFAULT: 100000 " )

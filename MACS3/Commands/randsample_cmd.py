@@ -1,4 +1,4 @@
-# Time-stamp: <2020-11-24 17:00:16 Tao Liu>
+# Time-stamp: <2021-05-25 14:23:34 taoliu>
 
 """Description: Random sample certain number/percentage of tags.
 
@@ -82,9 +82,8 @@ def load_tag_files_options ( options ):
     """
     options.info("# read treatment tags...")
     tp = options.parser(options.ifile[0], buffer_size=options.buffer_size)
-    if not options.tsize:           # override tsize if user specified --tsize
-        ttsize = tp.tsize()
-        options.tsize = ttsize
+    ttsize = tp.tsize()
+    options.tsize = ttsize
     treat = tp.build_fwtrack()
     #treat.sort()
     if len(options.ifile) > 1:
