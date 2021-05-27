@@ -1,4 +1,4 @@
-# Time-stamp: <2021-03-10 23:51:54 Tao Liu>
+# Time-stamp: <2021-05-27 16:17:09 taoliu>
 
 """Description: macs call
 
@@ -42,12 +42,12 @@ VCFHEADER_0="""##fileformat=VCFv4.1
 ##fileDate=%s
 ##source=MACS_V%s
 ##Program_Args=%s
-##INFO=<ID=M,Number=.,Type=String,Description="MACS Model with minimum BIC value">
+##INFO=<ID=M,Number=.,Type=String,Description="MACS Model with minimum BIC value: homo, heter_AS, heter_noAS, heter_unsure">
 ##INFO=<ID=MT,Number=.,Type=String,Description="Mutation type: SNV/Insertion/Deletion">
-##INFO=<ID=DPT,Number=1,Type=Integer,Description="Depth Treatment: Read depth in ChIP-seq data">
+##INFO=<ID=DPT,Number=1,Type=Integer,Description="Depth Treatment: Read depth in treatment data">
 ##INFO=<ID=DPC,Number=1,Type=Integer,Description="Depth Control: Read depth in control data">
-##INFO=<ID=DP1T,Number=.,Type=String,Description="Read depth of top1 allele in ChIP-seq data">
-##INFO=<ID=DP2T,Number=.,Type=String,Description="Read depth of top2 allele in ChIP-seq data">
+##INFO=<ID=DP1T,Number=.,Type=String,Description="Read depth of top1 allele in treatment data">
+##INFO=<ID=DP2T,Number=.,Type=String,Description="Read depth of top2 allele in treatment data">
 ##INFO=<ID=DP1C,Number=.,Type=String,Description="Read depth of top1 allele in control data">
 ##INFO=<ID=DP2C,Number=.,Type=String,Description="Read depth of top2 allele in control data">
 ##INFO=<ID=lnLHOMOMAJOR,Number=1,Type=Float,Description="Log(e) scaled genotype likelihoods of homozygous with major allele model">
@@ -71,15 +71,15 @@ VCFHEADER="""##fileformat=VCFv4.1
 ##fileDate=%s
 ##source=MACS_V%s
 ##Program_Args=%s
-##INFO=<ID=M,Number=.,Type=String,Description="MACS Model with minimum BIC value">
+##INFO=<ID=M,Number=.,Type=String,Description="MACS Model with minimum BIC value: homo, heter_AS, heter_noAS, heter_unsure">
 ##INFO=<ID=MT,Number=.,Type=String,Description="Mutation type: SNV/Insertion/Deletion">
-##INFO=<ID=DPT,Number=1,Type=Integer,Description="Depth Treatment: Read depth in ChIP-seq data">
+##INFO=<ID=DPT,Number=1,Type=Integer,Description="Depth Treatment: Read depth in treatment data">
 ##INFO=<ID=DPC,Number=1,Type=Integer,Description="Depth Control: Read depth in control data">
-##INFO=<ID=DP1T,Number=.,Type=String,Description="Read depth of top1 allele in ChIP-seq data">
-##INFO=<ID=DP2T,Number=.,Type=String,Description="Read depth of top2 allele in ChIP-seq data">
+##INFO=<ID=DP1T,Number=.,Type=String,Description="Read depth of top1 allele in treatment data">
+##INFO=<ID=DP2T,Number=.,Type=String,Description="Read depth of top2 allele in treatment data">
 ##INFO=<ID=DP1C,Number=.,Type=String,Description="Read depth of top1 allele in control data">
 ##INFO=<ID=DP2C,Number=.,Type=String,Description="Read depth of top2 allele in control data">
-##INFO=<ID=DBIC,Number=.,Type=Float,Description="Difference of BIC of selected model vs second best alternative model">
+##INFO=<ID=DBIC,Number=.,Type=Float,Description="Difference of BIC of the selected model vs the second best alternative model">
 ##INFO=<ID=BICHOMOMAJOR,Number=1,Type=Integer,Description="BIC of homozygous with major allele model">
 ##INFO=<ID=BICHOMOMINOR,Number=1,Type=Integer,Description="BIC of homozygous with minor allele model">
 ##INFO=<ID=BICHETERNOAS,Number=1,Type=Integer,Description="BIC of heterozygous with no allele-specific model">

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <2021-05-25 16:03:31 taoliu>
+# Time-stamp: <2021-05-27 16:21:46 taoliu>
 """Description: MACS v3 main executable.
 
 This code is free software; you can redistribute it and/or modify it
@@ -653,15 +653,7 @@ def add_callvar_parser( subparsers ):
     argparser_callvar = subparsers.add_parser("callvar",
                                               formatter_class = ap.RawDescriptionHelpFormatter,
                                               help="Call variants in given peak regions from the alignment BAM files.",
-                                              epilog = """ Assuming you have two types of BAM files. The first type, what we
-call `TREAT`, is from DNA enrichment assay such as ChIP-seq or
-ATAC-seq where the DNA fragments in the sequencing library are
-enriched in certain genomics regions with potential allele biases; the
-second type, called `CTRL` for control, is from genomic assay in which
-the DNA enrichment is less biased in multiploid chromosomes and more
-uniform across the whole genome (the later one is optional). In order
-to run `callvar`, please sort (by coordinates) and index the BAM
-files. Example:
+                                              epilog = """ Assuming you have two types of BAM files. The first type, what we call `TREAT`, is from DNA enrichment assay such as ChIP-seq or ATAC-seq where the DNA fragments in the sequencing library are enriched in certain genomics regions with potential allele biases; the second type, called `CTRL` for control, is from genomic assay in which the DNA enrichment is less biased in multiploid chromosomes and more uniform across the whole genome (the later one is optional). In order to run `callvar`, please sort (by coordinates) and index the BAM files. Example:
 
 1. Sort the BAM file:
     $ samtools sort TREAT.bam -o TREAT_sorted.bam
@@ -696,21 +688,21 @@ To call variants:
     group_para.add_argument( "-g", "--gq-hetero", dest = "GQCutoffHetero", type = float,
                              help = "Genotype Quality score (-10log10((L00+L11)/(L01+L00+L11))) cutoff for Heterozygous allele type. Default:0, or there is no cutoff on GQ.", default = 0 )
     group_para.add_argument( "-G", "--gq-homo", dest = "GQCutoffHomo", type = float,
-                             help = "Genotype Quality score (-10log10(L01/(L01+L00+L11))) cutoff for Homozygous allele (not the same as reference) type. Default:0, or ther is no cutoff on GQ.", default = 0 )
+                             help = "Genotype Quality score (-10log10(L01/(L01+L00+L11))) cutoff for Homozygous allele (not the same as reference) type. Default:0, or there is no cutoff on GQ.", default = 0 )
     group_para.add_argument( "-Q", dest = "Q", type = int, default = 20,
                              help = "Only consider bases with quality score greater than this value. Default: 20, which means Q20 or 0.01 error rate." )
     group_para.add_argument( "-D", dest = "maxDuplicate", type = int, default = 1,
                              help = "Maximum duplicated reads allowed per mapping position, mapping strand and the same CIGAR code. Default: 1. When sequencing depth is high, to set a higher value might help evaluate the correct allele ratio.")
     group_para.add_argument( "-F", "--fermi", dest = "fermi", type = str, default = "auto",
-                             help = "Option to control when to apply local assembly through Fermi. By default (set as 'auto'), while SAPPER detects any INDEL variant in a peak region, it will utilize Fermi to recover the actual DNA sequences to refine the read alignments. If set as 'on', Fermi will be always invoked. It can increase specificity however sensivity and speed will be significantly lower. If set as 'off', Fermi won't be invoked at all. If so, speed and sensitivity can be higher but specificity will be significantly lower. Default: auto" )
+                             help = "Option to control when to apply local assembly through fermi-lite. By default (set as 'auto'), while MACS3 detects any INDEL in a peak region, it will utilize `fermi-lite` to recover the actual DNA sequences to refine the read alignments. However it won't be invoked while MACS3 detects an SNV. If set as 'on', `fermi` will be always called on SNV or INDEL. It can increase specificity however sensivity and speed will be significantly lower. If set as 'off', `fermi` won't be invoked at all. If so, speed and sensitivity can be higher but specificity will be significantly lower. Default is 'auto'." )
     group_para.add_argument( "--fermi-overlap", dest = "fermiMinOverlap", type = int,
-                             help = "The minimal overlap for fermi to initially assemble two reads. Must be between 1 and read length. A longer fermiMinOverlap is needed while read length is small (e.g. 30 for 36bp read, but 33 for 100bp read may work). Default:30", default = 30 )
-    group_para.add_argument( "--top2alleles-mratio", dest = "top2allelesMinRatio", type = float,
+                             help = "The minimal overlap for fermi to initially assemble two reads. Must be between 1 and read length. Suggested value: 30 for 36bp read, 33 for 100bp read. Default:33", default = 33 )
+    group_para.add_argument( "--min-top2ratio", dest = "top2allelesMinRatio", type = float,
                              help = "The reads for the top 2 most frequent alleles (e.g. a ref allele and an alternative allele) at a loci shouldn't be too few comparing to total reads mapped. The minimum ratio is set by this optoin. Must be a float between 0.5 and 1.  Default:0.8 which means at least 80%% of reads contain the top 2 alleles.", default = 0.8 )
-    group_para.add_argument( "--altallele-count", dest = "altalleleMinCount", type = int,
+    group_para.add_argument( "--min-altcount", dest = "altalleleMinCount", type = int,
                              help = "The count of the alternative (non-reference) allele at a loci shouldn't be too few. By default, we require at least two reads support the alternative allele. Default:2", default = 2 )
     group_para.add_argument( "--max-ar", dest = "maxAR", type = float,
-                             help = "The maximum Allele-Ratio allowed while calculating likelihood for allele-specific binding. If we allow higher maxAR, we may mistakenly assign some homozygous loci as heterozygous. Default:0.95", default = 0.95 )
+                             help = "The maximum Allele-Ratio allowed while calculating likelihood for allele-specific binding. If we allow higher maximum AR, we may mistakenly assign some 'bound homozygous loci' as 'heterozygous loci with allele specific binding'. Or in another word, we assume that the extreme biased enrichment on the alleles are rare. Default:0.95", default = 0.95 )
     # group for misc
     group_misc = argparser_callvar.add_argument_group( "Misc arguments" )
     group_misc.add_argument( "-m", "--multiple-processing", dest = "np", type = int, default = 1,
